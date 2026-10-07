@@ -17,3 +17,11 @@ export function getYahooSymbol(exchangeCode: string): string {
 
   return yahooSymbol;
 }
+
+export function getGoogleSymbol(exchangeCode: string): string {
+  if (/^[A-Z]+$/.test(exchangeCode)) {
+    return `${exchangeCode}:NSE`;
+  }
+
+  return `${exchangeCode}:BOM`;
+}

@@ -1,6 +1,7 @@
 import { getPortfolioHoldings } from "../repositories/portfolio.repository.js";
-import { getYahooSymbol } from "../providers/symbol-mapper.js";
+import { getGoogleSymbol, getYahooSymbol } from "../providers/symbol-mapper.js";
 import { getYahooQuotes } from "../providers/yahoo.provider.js";
+import { getGoogleFundamentals } from "../providers/google-finance-provider.js";
 
 export async function getPortfolio() {
   // 1. Get holdings from PostgreSQL
@@ -13,6 +14,22 @@ export async function getPortfolio() {
 
   // 3. Fetch current market prices
   const quotes = await getYahooQuotes(symbols);
+
+  const fundamentals = await Promise.all(
+    holdings.map((holding) => {
+      const googleSymbol = getGoogleSymbol(holding.stock.exchangeCode);
+      return getGoogleFundamentals(googleSymbol);
+    }),
+  );
+
+  const fundamentalMap = new Map(
+    fundamentals
+      .filter(
+        (fundamental): fundamental is NonNullable<typeof fundamental> =>
+          fundamental !== null,
+      )
+      .map((fundamental) => [fundamental.symbol, fundamental]),
+  );
 
   // 4. Create quick lookup:
   //
@@ -33,6 +50,9 @@ export async function getPortfolio() {
     const investment = purchasePrice * quantity;
 
     const yahooSymbol = getYahooSymbol(holding.stock.exchangeCode);
+
+    const googleSymbol = getGoogleSymbol(holding.stock.exchangeCode);
+    const fundamental = fundamentalMap.get(googleSymbol);
 
     const cmp = quoteMap.get(yahooSymbol) ?? null;
 
@@ -56,6 +76,8 @@ export async function getPortfolio() {
       cmp,
       presentValue,
       gainLoss,
+      peRatio: fundamental?.peRatio ?? null,
+      latestEarnings: fundamental?.latestEarnings ?? null,
     };
   });
 
@@ -82,13 +104,45 @@ export async function getPortfolio() {
   // 9. Calculate portfolio-level gain/loss
   const totalGainLoss = totalPresentValue - totalInvestment;
 
+  const sectorMap = new Map<
+    string,
+    {
+      totalInvestment: number;
+      totalPresentValue: number;
+      totalGainLoss: number;
+    }
+  >();
+
+  for (const holding of finalHoldings) {
+    const sector = holding.stock.sector;
+
+    const existing = sectorMap.get(sector);
+
+    if (existing) {
+      existing.totalInvestment += holding.investment;
+      existing.totalPresentValue += holding.presentValue ?? 0;
+      existing.totalGainLoss += holding.gainLoss ?? 0;
+    } else {
+      sectorMap.set(sector, {
+        totalInvestment: holding.investment,
+        totalPresentValue: holding.presentValue ?? 0,
+        totalGainLoss: holding.gainLoss ?? 0,
+      });
+    }
+  }
+
+  const sectors = Array.from(sectorMap.entries()).map(([name, values]) => ({
+    name,
+    ...values,
+  }));
+
   return {
     summary: {
       totalInvestment,
       totalPresentValue,
       totalGainLoss,
     },
-
+    sectors,
     holdings: finalHoldings,
   };
 }
