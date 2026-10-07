@@ -1,0 +1,31 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Stock {
+  id           Int    @id @default(autoincrement())
+  name         String
+  exchangeCode String
+  sector       String
+
+  holding Holding?
+}
+
+model Holding {
+  id            Int @id @default(autoincrement())
+  stockId       Int @unique
+  purchasePrice Decimal
+  quantity      Int
+
+  stock Stock @relation(fields: [stockId], references: [id])
+}
