@@ -42,5 +42,17 @@ export async function getYahooQuote(
 export async function getYahooQuotes(
   symbols: string[],
 ): Promise<(MarketQuote | null)[]> {
-  return Promise.all(symbols.map((symbol) => getYahooQuote(symbol)));
+  const results: (MarketQuote | null)[] = [];
+
+  for (let i = 0; i < symbols.length; i += 5) {
+    const batch = symbols.slice(i, i + 5);
+
+    const batchResults = await Promise.all(
+      batch.map((symbol) => getYahooQuote(symbol)),
+    );
+
+    results.push(...batchResults);
+  }
+
+  return results;
 }
