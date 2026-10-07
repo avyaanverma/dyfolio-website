@@ -1,28 +1,11 @@
-import express from "express";
-import cors from "cors";
+import { createApp } from "./app.js";
+import "dotenv/config";
 
 export function createServer() {
-  const app = express();
-  const PORT = 5000;
-
-  app.use(
-    cors({
-      origin: "https://localhost:3000",
-    }),
-  );
-
-  app.use(express.json());
-
-  app.get("/api/health", (req, res) => {
-    res.status(200).json({
-      status: "ok",
-      service: "dyfolio-api",
-      timestamp: new Date().toISOString(),
-    });
-  });
-
+  const app = createApp();
+  const PORT = Number(process.env.PORT) || 5000;
   app.listen(PORT, () => {
-    console.log("Server is running on port 5000");
+    console.log(`Server is running on port ${PORT}`);
   });
 }
 
