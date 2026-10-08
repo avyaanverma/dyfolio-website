@@ -36,7 +36,7 @@ export type Portfolio = {
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000";
 
 export async function getPortfolio(): Promise<Portfolio> {
-  const response = await fetch(`${API_URL}/api/portfolio`, {
+  const response = await fetch(`${API_URL}/api/v1/portfolio`, {
     cache: "no-store",
   });
 
