@@ -30,8 +30,6 @@
 
 ## Preview
 
-> Screenshots will be added after the final UI polish and production deployment.
-
 ### Dashboard
 
 <p align="center">
