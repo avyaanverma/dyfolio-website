@@ -6,15 +6,17 @@ import portfolioRoutes from "./routes/portfolio.routes.js";
 export function createApp(): Express {
   const app = express();
 
+  const frontendUrl = process.env.FRONTEND_URL ?? "http://localhost:3000";
+
   app.use(
     cors({
-      origin: "http://localhost:3000",
+      origin: frontendUrl,
     }),
   );
 
   app.use(express.json());
 
-  app.get("/api/health", (req, res) => {
+  app.get("/api/health", (_req, res) => {
     res.status(200).json({
       status: "ok",
       service: "dyfolio-api",
