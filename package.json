@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "pnpm --parallel --filter @dyfolio/web --filter @dyfolio/api dev",
+    "dev": "pnpm --parallel --filter @dyfolio/api dev --filter @dyfolio/web ",
     "build": "pnpm --filter @dyfolio/web build && pnpm --filter @dyfolio/api build",
     "lint": "pnpm --filter @dyfolio/web lint",
     "typecheck": "pnpm --filter @dyfolio/web typecheck && pnpm --filter @dyfolio/api typecheck",
