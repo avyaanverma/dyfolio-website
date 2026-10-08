@@ -18,7 +18,8 @@ model Stock {
   exchangeCode String
   sector       String
 
-  holding Holding?
+  holding      Holding?
+  priceHistory PriceHistory[]
 }
 
 model Holding {
@@ -28,4 +29,15 @@ model Holding {
   quantity      Int
 
   stock Stock @relation(fields: [stockId], references: [id])
+}
+
+model PriceHistory {
+  id        Int      @id @default(autoincrement())
+  stockId   Int
+  price     Decimal
+  recordedAt DateTime @default(now())
+
+  stock Stock @relation(fields: [stockId], references: [id])
+
+  @@index([stockId, recordedAt])
 }

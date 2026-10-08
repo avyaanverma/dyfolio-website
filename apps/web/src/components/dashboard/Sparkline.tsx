@@ -5,38 +5,36 @@ import {
   AreaChart,
   ResponsiveContainer,
 } from "recharts";
+import { useId } from "react";
+import type { PricePoint } from "@/lib/api";
 
 type SparklineProps = {
-  data: number[];
-  positive?: boolean;
+  data: PricePoint[];
 };
 
-export default function Sparkline({
-  data,
-  positive = true,
-}: SparklineProps) {
+export default function Sparkline({ data }: SparklineProps) {
+  const chartId = useId().replace(/:/g, "");
+
   if (data.length < 2) {
     return (
-      <div className="h-10 w-28 flex items-center">
-        <div className="h-px w-full bg-white/15" />
+      <div className="flex h-10 w-28 items-center justify-end text-xs text-neutral-600">
+        No chart data
       </div>
     );
   }
 
-  const chartData = data.map((value, index) => ({
-    index,
-    value,
-  }));
-
-  const stroke = positive ? "#22c55e" : "#ef4444";
+  const isPositive = data.at(-1)!.price >= data[0]!.price;
+  const stroke = isPositive ? "#22c55e" : "#ef4444";
+  const chartData = data.map(({ timestamp, price }) => ({ timestamp, price }));
+  const gradientId = `spark-${chartId}`;
 
   return (
-    <div className="h-10 w-28">
+    <div className="h-10 w-28" aria-label="Intraday price trend">
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={chartData}>
           <defs>
             <linearGradient
-              id={`spark-${positive ? "positive" : "negative"}`}
+              id={gradientId}
               x1="0"
               y1="0"
               x2="0"
@@ -58,12 +56,10 @@ export default function Sparkline({
 
           <Area
             type="monotone"
-            dataKey="value"
+            dataKey="price"
             stroke={stroke}
             strokeWidth={1.5}
-            fill={`url(#spark-${
-              positive ? "positive" : "negative"
-            })`}
+            fill={`url(#${gradientId})`}
             dot={false}
             isAnimationActive
             animationDuration={500}
