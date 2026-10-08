@@ -1,6 +1,9 @@
 import { getPortfolioHoldings } from "../repositories/portfolio.repository.js";
 import { getGoogleSymbol, getYahooSymbol } from "../providers/symbol-mapper.js";
-import { getYahooQuotes } from "../providers/yahoo.provider.js";
+import {
+  getYahooPriceHistory,
+  getYahooQuotes,
+} from "../providers/yahoo.provider.js";
 import { getGoogleFundamentals } from "../providers/google-finance-provider.js";
 
 export async function getPortfolio() {
@@ -14,6 +17,14 @@ export async function getPortfolio() {
 
   // 3. Fetch current market prices
   const quotes = await getYahooQuotes(symbols);
+
+  const priceHistories = await Promise.all(
+    symbols.map((symbol) => getYahooPriceHistory(symbol)),
+  );
+
+  const priceHistoryMap = new Map(
+    symbols.map((symbol, index) => [symbol, priceHistories[index] ?? []]),
+  );
 
   const fundamentals = await Promise.all(
     holdings.map((holding) => {

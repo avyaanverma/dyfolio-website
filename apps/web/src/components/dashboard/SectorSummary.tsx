@@ -1,35 +1,8 @@
-const sectors = [
-  {
-    name: "Financial Sector",
-    investment: 288450,
-    percentage: 17.19,
-  },
-  {
-    name: "Tech Sector",
-    investment: 298420,
-    percentage: 17.78,
-  },
-  {
-    name: "Consumer",
-    investment: 263565,
-    percentage: 15.7,
-  },
-  {
-    name: "Power",
-    investment: 159060,
-    percentage: 9.48,
-  },
-  {
-    name: "Pipe Sector",
-    investment: 198656,
-    percentage: 11.84,
-  },
-  {
-    name: "Others",
-    investment: 470476,
-    percentage: 28.03,
-  },
-];
+import type { Sector } from "@/lib/api";
+
+type SectorSummaryProps = {
+  sectors: Sector[];
+};
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat("en-IN", {
@@ -39,7 +12,12 @@ function formatCurrency(value: number) {
   }).format(value);
 }
 
-export default function SectorSummary() {
+export default function SectorSummary({ sectors }: SectorSummaryProps) {
+  const totalInvestment = sectors.reduce(
+    (total, sector) => total + sector.totalInvestment,
+    0,
+  );
+
   return (
     <section className="border-b py-10">
       <div className="mb-8 flex items-end justify-between">
@@ -55,25 +33,34 @@ export default function SectorSummary() {
       </div>
 
       <div className="space-y-5">
-        {sectors.map((sector) => (
-          <div key={sector.name}>
-            <div className="mb-2 flex items-center justify-between text-sm">
-              <span className="font-medium">{sector.name}</span>
+        {sectors.map((sector) => {
+          const percentage =
+            totalInvestment === 0
+              ? 0
+              : (sector.totalInvestment / totalInvestment) * 100;
 
-              <span className="text-neutral-500">
-                {formatCurrency(sector.investment)} ·{" "}
-                {sector.percentage.toFixed(1)}%
-              </span>
-            </div>
+          return (
+            <div key={sector.name}>
+              <div className="mb-2 flex items-center justify-between text-sm">
+                <span className="font-medium">{sector.name}</span>
 
-            <div className="h-1.5 w-full bg-neutral-200">
-              <div
-                className="h-full bg-neutral-900"
-                style={{ width: `${sector.percentage}%` }}
-              />
+                <span className="text-neutral-500">
+                  {formatCurrency(sector.totalInvestment)} ·{" "}
+                  {percentage.toFixed(1)}%
+                </span>
+              </div>
+
+              <div className="h-1.5 w-full bg-neutral-200">
+                <div
+                  className="h-full bg-neutral-900 transition-all duration-700 ease-out"
+                  style={{
+                    width: `${percentage}%`,
+                  }}
+                />
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </section>
   );

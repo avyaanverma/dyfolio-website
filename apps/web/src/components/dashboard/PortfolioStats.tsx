@@ -1,4 +1,25 @@
-export default function PortfolioStats() {
+import type { Portfolio } from "@/lib/api";
+
+type PortfolioStatsProps = {
+  summary: Portfolio["summary"];
+};
+
+function formatCurrency(value: number) {
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 2,
+  }).format(value);
+}
+
+export default function PortfolioStats({ summary }: PortfolioStatsProps) {
+  const { totalInvestment, totalPresentValue, totalGainLoss } = summary;
+
+  const returnPercentage =
+    totalInvestment === 0 ? 0 : (totalGainLoss / totalInvestment) * 100;
+
+  const isProfit = totalGainLoss >= 0;
+
   return (
     <section className="border-b py-10">
       <p className="text-xs font-medium uppercase tracking-[0.18em] text-neutral-500">
@@ -6,13 +27,29 @@ export default function PortfolioStats() {
       </p>
 
       <div className="mt-3 text-5xl font-medium tracking-tight">
-        ₹13,98,694.81
+        {formatCurrency(totalPresentValue)}
       </div>
 
       <div className="mt-3 flex items-center gap-3">
-        <span className="text-sm font-medium text-red-600">−₹2,79,932.19</span>
+        <span
+          className={
+            isProfit
+              ? "text-sm font-medium text-green-600"
+              : "text-sm font-medium text-red-600"
+          }
+        >
+          {isProfit ? "+" : "−"}
+          {formatCurrency(Math.abs(totalGainLoss))}
+        </span>
 
-        <span className="text-sm text-red-600">−16.68%</span>
+        <span
+          className={
+            isProfit ? "text-sm text-green-600" : "text-sm text-red-600"
+          }
+        >
+          {isProfit ? "+" : "−"}
+          {Math.abs(returnPercentage).toFixed(2)}%
+        </span>
       </div>
 
       <div className="mt-10 grid grid-cols-2 gap-8 md:grid-cols-3">
@@ -21,7 +58,9 @@ export default function PortfolioStats() {
             Investment
           </p>
 
-          <p className="mt-2 text-lg font-medium">₹16,78,627</p>
+          <p className="mt-2 text-lg font-medium">
+            {formatCurrency(totalInvestment)}
+          </p>
         </div>
 
         <div>
@@ -29,7 +68,9 @@ export default function PortfolioStats() {
             Present value
           </p>
 
-          <p className="mt-2 text-lg font-medium">₹13,98,694.81</p>
+          <p className="mt-2 text-lg font-medium">
+            {formatCurrency(totalPresentValue)}
+          </p>
         </div>
 
         <div>
@@ -37,7 +78,14 @@ export default function PortfolioStats() {
             Total P&L
           </p>
 
-          <p className="mt-2 text-lg font-medium text-red-600">−₹2,79,932.19</p>
+          <p
+            className={`mt-2 text-lg font-medium ${
+              isProfit ? "text-green-600" : "text-red-600"
+            }`}
+          >
+            {isProfit ? "+" : "−"}
+            {formatCurrency(Math.abs(totalGainLoss))}
+          </p>
         </div>
       </div>
     </section>
