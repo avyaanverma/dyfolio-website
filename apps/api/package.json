@@ -8,7 +8,7 @@
     "build": "prisma generate --config ./prisma7.config.ts && tsc -p tsconfig.json",
     "start": "node dist/server.js",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "test": "node --import tsx --test"
+    "test": "node --import tsx --test src/tests/*.test.ts"
   },
   "keywords": [],
   "author": "",

@@ -12,8 +12,14 @@ export type Holding = {
   cmp: number | null;
   presentValue: number | null;
   gainLoss: number | null;
+  priceHistory: PricePoint[];
   peRatio: number | null;
   latestEarnings: number | null;
+};
+
+export type PricePoint = {
+  timestamp: number;
+  price: number;
 };
 
 export type Sector = {
@@ -35,13 +41,17 @@ export type Portfolio = {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000";
 
-export async function getPortfolio(): Promise<Portfolio> {
+export async function getPortfolio(signal?: AbortSignal): Promise<Portfolio> {
   const response = await fetch(`${API_URL}/api/v1/portfolio`, {
     cache: "no-store",
+    signal,
   });
 
   if (!response.ok) {
-    throw new Error("Failed to fetch portfolio");
+    const result = (await response.json().catch(() => null)) as {
+      message?: string;
+    } | null;
+    throw new Error(result?.message ?? "Failed to fetch portfolio");
   }
 
   const result : {

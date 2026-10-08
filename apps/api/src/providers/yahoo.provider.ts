@@ -1,6 +1,11 @@
 import YahooFinance from "yahoo-finance2";
 import type { MarketQuote, PricePoint } from "./types.js";
-import { getCachedQuote, setCachedQuote } from "../cache/market-data.cache.js";
+import {
+  getCachedPriceHistory,
+  getCachedQuote,
+  setCachedPriceHistory,
+  setCachedQuote,
+} from "../cache/market-data.cache.js";
 import { logger } from "../lib/logger.js";
 
 const yahooFinance = new YahooFinance();
@@ -57,7 +62,13 @@ export async function getYahooQuotes(
 
 export async function getYahooPriceHistory(
   symbol: string,
-): Promise<(PricePoint | null)[]> {
+): Promise<PricePoint[]> {
+  const cachedHistory = getCachedPriceHistory(symbol);
+
+  if (cachedHistory) {
+    return cachedHistory;
+  }
+
   try {
     const period1 = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
@@ -66,12 +77,16 @@ export async function getYahooPriceHistory(
       interval: "5m",
     });
 
-    return result.quotes
+    const points = result.quotes
       .filter((quote) => quote.close !== null && quote.close !== undefined)
       .map((quote) => ({
         timestamp: new Date(quote.date).getTime(),
         price: quote.close,
-      }));
+      }))
+      .slice(-30);
+
+    setCachedPriceHistory(symbol, points);
+    return points;
   } catch (error) {
     logger.warn({ err: error, symbol }, "Yahoo price history request failed");
 

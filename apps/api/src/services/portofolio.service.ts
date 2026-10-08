@@ -87,6 +87,7 @@ export async function getPortfolio() {
       cmp,
       presentValue,
       gainLoss,
+      priceHistory: priceHistoryMap.get(yahooSymbol) ?? [],
       peRatio: fundamental?.peRatio ?? null,
       latestEarnings: fundamental?.latestEarnings ?? null,
     };

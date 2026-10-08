@@ -21,39 +21,49 @@ export default function PortfolioStats({ summary }: PortfolioStatsProps) {
   const isProfit = totalGainLoss >= 0;
 
   return (
-    <section className="border-b py-10">
-      <p className="text-xs font-medium uppercase tracking-[0.18em] text-neutral-500">
-        Current portfolio value
-      </p>
-
-      <div className="mt-3 text-5xl font-medium tracking-tight">
-        {formatCurrency(totalPresentValue)}
-      </div>
-
-      <div className="mt-3 flex items-center gap-3">
-        <span
-          className={
-            isProfit
-              ? "text-sm font-medium text-green-600"
-              : "text-sm font-medium text-red-600"
-          }
-        >
-          {isProfit ? "+" : "−"}
-          {formatCurrency(Math.abs(totalGainLoss))}
-        </span>
-
-        <span
-          className={
-            isProfit ? "text-sm text-green-600" : "text-sm text-red-600"
-          }
-        >
-          {isProfit ? "+" : "−"}
-          {Math.abs(returnPercentage).toFixed(2)}%
-        </span>
-      </div>
-
-      <div className="mt-10 grid grid-cols-2 gap-8 md:grid-cols-3">
+    <section className="border-b border-white/10 py-8 md:py-10">
+      <div className="flex flex-col justify-between gap-8 md:flex-row md:items-end">
         <div>
+          <p className="text-xs font-medium uppercase tracking-[0.18em] text-neutral-500">
+            Portfolio value
+          </p>
+
+          <h1 className="mt-3 text-4xl font-medium tracking-tight md:text-5xl">
+            {formatCurrency(totalPresentValue)}
+          </h1>
+
+          <div className="mt-3 flex items-center gap-3">
+            <span
+              className={
+                isProfit
+                  ? "text-sm font-medium text-green-500"
+                  : "text-sm font-medium text-red-500"
+              }
+            >
+              {isProfit ? "+" : "−"}
+              {formatCurrency(Math.abs(totalGainLoss))}
+            </span>
+
+            <span className="text-neutral-600">/</span>
+
+            <span
+              className={
+                isProfit ? "text-sm text-green-500" : "text-sm text-red-500"
+              }
+            >
+              {isProfit ? "+" : "−"}
+              {Math.abs(returnPercentage).toFixed(2)}%
+            </span>
+          </div>
+        </div>
+
+        <p className="text-xs uppercase tracking-[0.16em] text-neutral-600">
+          Live portfolio
+        </p>
+      </div>
+
+      <div className="mt-8 grid grid-cols-1 border-t border-white/10 sm:grid-cols-3">
+        <div className="border-b border-white/10 py-5 sm:border-b-0 sm:border-r sm:pr-6">
           <p className="text-xs uppercase tracking-wider text-neutral-500">
             Investment
           </p>
@@ -63,7 +73,7 @@ export default function PortfolioStats({ summary }: PortfolioStatsProps) {
           </p>
         </div>
 
-        <div>
+        <div className="border-b border-white/10 py-5 sm:border-b-0 sm:px-6 sm:border-r">
           <p className="text-xs uppercase tracking-wider text-neutral-500">
             Present value
           </p>
@@ -73,14 +83,14 @@ export default function PortfolioStats({ summary }: PortfolioStatsProps) {
           </p>
         </div>
 
-        <div>
+        <div className="py-5 sm:pl-6">
           <p className="text-xs uppercase tracking-wider text-neutral-500">
             Total P&L
           </p>
 
           <p
             className={`mt-2 text-lg font-medium ${
-              isProfit ? "text-green-600" : "text-red-600"
+              isProfit ? "text-green-500" : "text-red-500"
             }`}
           >
             {isProfit ? "+" : "−"}
