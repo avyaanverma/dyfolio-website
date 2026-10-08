@@ -1,37 +1,31 @@
 import { getPortfolioHoldings } from "../repositories/portfolio.repository.js";
-import { getGoogleSymbol, getYahooSymbol } from "../providers/symbol-mapper.js";
-import {
-  getYahooPriceHistory,
-  getYahooQuotes,
-} from "../providers/yahoo.provider.js";
+import { getGoogleSymbol } from "../providers/symbol-mapper.js";
 import { getGoogleFundamentals } from "../providers/google-finance-provider.js";
+import {
+  getLatestPrice,
+  getPriceHistory,
+} from "../repositories/price-history.repository.js";
 
 export async function getPortfolio() {
   // 1. Get holdings from PostgreSQL
   const holdings = await getPortfolioHoldings();
 
-  // 2. Convert database exchange codes into Yahoo symbols
-  const symbols = holdings.map((holding) =>
-    getYahooSymbol(holding.stock.exchangeCode),
-  );
-
-  // 3. Fetch current market prices
-  const quotes = await getYahooQuotes(symbols);
-
-  const priceHistories = await Promise.all(
-    symbols.map((symbol) => getYahooPriceHistory(symbol)),
-  );
-
-  const priceHistoryMap = new Map(
-    symbols.map((symbol, index) => [symbol, priceHistories[index] ?? []]),
-  );
-
-  const fundamentals = await Promise.all(
-    holdings.map((holding) => {
-      const googleSymbol = getGoogleSymbol(holding.stock.exchangeCode);
-      return getGoogleFundamentals(googleSymbol);
-    }),
-  );
+  // Fundamentals retain their existing long-lived cache. CMP and chart data are
+  // read from PostgreSQL only; the market worker is the only Yahoo caller.
+  const [fundamentals, marketData] = await Promise.all([
+    Promise.all(
+      holdings.map((holding) => {
+        const googleSymbol = getGoogleSymbol(holding.stock.exchangeCode);
+        return getGoogleFundamentals(googleSymbol);
+      }),
+    ),
+    Promise.all(
+      holdings.map(async (holding) => ({
+        latestPrice: await getLatestPrice(holding.stockId),
+        priceHistory: await getPriceHistory(holding.stockId),
+      })),
+    ),
+  ]);
 
   const fundamentalMap = new Map(
     fundamentals
@@ -42,30 +36,17 @@ export async function getPortfolio() {
       .map((fundamental) => [fundamental.symbol, fundamental]),
   );
 
-  // 4. Create quick lookup:
-  //
-  // HDFCBANK.NS -> 2010
-  // BAJFINANCE.NS -> 950
-  //
-  const quoteMap = new Map(
-    quotes
-      .filter((quote) => quote !== null) //
-      .map((quote) => [quote.symbol, quote.cmp]),
-  );
-
-  // 5. Combine database data + market data
-  const portfolioHoldings = holdings.map((holding) => {
+  // Combine stable portfolio data with persisted market data.
+  const portfolioHoldings = holdings.map((holding, index) => {
     const purchasePrice = Number(holding.purchasePrice);
     const quantity = holding.quantity;
 
     const investment = purchasePrice * quantity;
 
-    const yahooSymbol = getYahooSymbol(holding.stock.exchangeCode);
-
     const googleSymbol = getGoogleSymbol(holding.stock.exchangeCode);
     const fundamental = fundamentalMap.get(googleSymbol);
-
-    const cmp = quoteMap.get(yahooSymbol) ?? null;
+    const persistedMarketData = marketData[index]!;
+    const cmp = persistedMarketData.latestPrice;
 
     const presentValue = cmp === null ? null : cmp * quantity;
 
@@ -87,7 +68,7 @@ export async function getPortfolio() {
       cmp,
       presentValue,
       gainLoss,
-      priceHistory: priceHistoryMap.get(yahooSymbol) ?? [],
+      priceHistory: persistedMarketData.priceHistory,
       peRatio: fundamental?.peRatio ?? null,
       latestEarnings: fundamental?.latestEarnings ?? null,
     };

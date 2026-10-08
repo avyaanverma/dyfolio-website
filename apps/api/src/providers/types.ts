@@ -8,8 +8,3 @@ export type FundamentalData = {
   peRatio: number | null;
   latestEarnings: number | null;
 };
-
-export type PricePoint = {
-  timestamp: number;
-  price: number | null;
-};

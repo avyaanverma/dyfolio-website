@@ -18,8 +18,8 @@ export type Holding = {
 };
 
 export type PricePoint = {
-  timestamp: number;
   price: number;
+  recordedAt: string;
 };
 
 export type Sector = {
