@@ -25,7 +25,7 @@ export default function Sparkline({ data }: SparklineProps) {
 
   const isPositive = data.at(-1)!.price >= data[0]!.price;
   const stroke = isPositive ? "#22c55e" : "#ef4444";
-  const chartData = data.map(({ timestamp, price }) => ({ timestamp, price }));
+  const chartData = data.map(({ recordedAt, price }) => ({ recordedAt, price }));
   const gradientId = `spark-${chartId}`;
 
   return (

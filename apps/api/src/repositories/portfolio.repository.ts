@@ -7,3 +7,12 @@ export async function getPortfolioHoldings() {
     },
   });
 }
+
+export async function getStockIdForHolding(holdingId: number) {
+  const holding = await prisma.holding.findUnique({
+    where: { id: holdingId },
+    select: { stockId: true },
+  });
+
+  return holding?.stockId ?? null;
+}
