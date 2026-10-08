@@ -1,4 +1,5 @@
 import type { FundamentalData } from "./types.js";
+import { logger } from "../lib/logger.js";
 
 type CachedFundamental = {
   data: FundamentalData;
@@ -54,7 +55,7 @@ export async function getGoogleFundamentals(
     });
 
     if (!response.ok) {
-      console.warn(`Google Finance failed for ${symbol}: ${response.status}`);
+      logger.warn({ symbol, status: response.status }, "Google Finance request failed");
       return null;
     }
 
@@ -96,7 +97,7 @@ export async function getGoogleFundamentals(
 
     return data;
   } catch (error) {
-    console.warn(`Google Finance failed for ${symbol}:`, error);
+    logger.warn({ err: error, symbol }, "Google Finance request failed");
     return null;
   }
 }

@@ -4,8 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "pnpm --filter @dyfolio/web dev && pnpm --filter @dyfolio/api dev"
+    "dev": "pnpm --parallel --filter @dyfolio/web --filter @dyfolio/api dev",
+    "build": "pnpm --filter @dyfolio/web build && pnpm --filter @dyfolio/api build",
+    "lint": "pnpm --filter @dyfolio/web lint",
+    "typecheck": "pnpm --filter @dyfolio/web typecheck && pnpm --filter @dyfolio/api typecheck",
+    "test": "pnpm --filter @dyfolio/api test"
   },
   "keywords": [],
   "author": "",

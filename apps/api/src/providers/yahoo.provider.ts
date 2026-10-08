@@ -1,6 +1,7 @@
 import YahooFinance from "yahoo-finance2";
 import type { MarketQuote, PricePoint } from "./types.js";
 import { getCachedQuote, setCachedQuote } from "../cache/market-data.cache.js";
+import { logger } from "../lib/logger.js";
 
 const yahooFinance = new YahooFinance();
 
@@ -17,7 +18,7 @@ export async function getYahooQuote(
     const quote = await yahooFinance.quote(symbol);
 
     if (!quote || quote.regularMarketPrice == null) {
-      console.warn(`CMP unavailable for ${symbol}`);
+      logger.warn({ symbol }, "CMP unavailable");
       return null;
     }
 
@@ -30,7 +31,7 @@ export async function getYahooQuote(
 
     return marketQuote;
   } catch (error) {
-    console.warn(`Yahoo failed for ${symbol}:`, error);
+    logger.warn({ err: error, symbol }, "Yahoo quote request failed");
 
     return null;
   }
@@ -72,7 +73,7 @@ export async function getYahooPriceHistory(
         price: quote.close,
       }));
   } catch (error) {
-    console.warn(`Yahoo price history failed for ${symbol}:`, error);
+    logger.warn({ err: error, symbol }, "Yahoo price history request failed");
 
     return [];
   }
