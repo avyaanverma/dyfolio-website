@@ -1,14 +1,13 @@
 {
   "name": "DyFolio",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "pnpm --filter @dyfolio/web dev && pnpm --filter @dyfolio/api dev"
+    "dev": "pnpm --filter @dyfolio/web dev & pnpm --filter @dyfolio/api dev",
+    "lint": "pnpm --filter @dyfolio/web lint",
+    "typecheck": "pnpm --filter @dyfolio/web exec tsc --noEmit",
+    "test": "pnpm --filter @dyfolio/api test",
+    "build": "pnpm --filter @dyfolio/api build && pnpm --filter @dyfolio/web build"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "packageManager": "pnpm@10.28.2"
 }
